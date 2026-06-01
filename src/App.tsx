@@ -1,11 +1,241 @@
-import { useEffect, useRef, useState } from "react";
+import { Fragment, lazy, Suspense, useEffect, useRef, useState } from "react";
 import Lenis from "lenis";
+import { gsap } from "gsap";
 import { CalendarClock, ChevronLeft, ChevronRight, Layers, Mail, MapPin, Phone, ShieldCheck, X } from "lucide-react";
 
-import BookingForm from "./components/BookingForm";
-import RouteGuide from "./components/RouteGuide";
 import ScrollVideoPlayer from "./components/ScrollVideoPlayer";
 import { ServiceCard } from "./types";
+
+const BookingForm = lazy(() => import("./components/BookingForm"));
+const RouteGuide = lazy(() => import("./components/RouteGuide"));
+
+type Language = "et" | "ru";
+type IntroPhase = "notice" | "loading" | "split" | "revealing" | "done";
+const LANGUAGE_STORAGE_KEY = "caninus-language";
+
+function getInitialLanguage(): Language {
+  if (typeof window === "undefined") return "et";
+  return window.localStorage.getItem(LANGUAGE_STORAGE_KEY) === "ru" ? "ru" : "et";
+}
+
+const copy = {
+  et: {
+    brandSubtitle: "Hambaravi",
+    navLabel: "Peamenüü",
+    nav: {
+      home: "Avaleht",
+      about: "Kliinikust",
+      services: "Teenused",
+      results: "Tulemused",
+      contacts: "Kontaktid",
+    },
+    location: "Tallinn, Tatari 6",
+    call: "Helista",
+    languageLabel: "Keel",
+    languageEt: "Eesti",
+    languageRu: "Vene",
+    hero: {
+      eyebrow: "Caninus hambaravi",
+      line1: "Innovaatiline",
+      strong: "hammaste taastamise",
+      middle: "",
+      technology: "tehnoloogia",
+      forWord: "terve",
+      healthy: "naeratuse",
+      cta: "Broneeri konsultatsioon",
+      noteLeft: "Implantaadi jälgimine",
+      noteRight: "Premium-materjalid",
+      smilePrefix: "ja",
+      smileStrong: "Kindla",
+      smileLine: "Naeratuse",
+      patients:
+        "Patsiendid keerukate hambaravi vajadustega on saanud diagnostika, personaalse raviplaani ja mugavuse tagasi.",
+      statsLabel: "Caninuse kogemus",
+      downLabel: "Liigu kliiniku statistika juurde",
+      aboutLink: "Kliinikust",
+    },
+    stats: {
+      years: "Aastat\nkogemust",
+      clinics: "Kliinikut\nEuroopas",
+    },
+    about: {
+      kicker: "Kliinikust",
+      line1: "Rohkem kui",
+      clinic: "kliinik",
+      accent: "Teie naeratuse",
+      line3: "partner",
+      copy: "Caninuses saate rohkem kui ravi: saate tähelepaneliku partneri oma suu tervise ja kindla naeratuse jaoks.",
+      prev: "Eelmine kaart",
+      next: "Järgmine kaart",
+      cardsLabel: "Kliiniku eelised",
+    },
+    serviceCards: [
+      {
+        number: "01",
+        title: "Kogenud\nspetsialistid",
+        description: "Juhtivad hambakirurgid, kellel on üle 10 aasta kliinilist kogemust Eestis ja Euroopa Liidus.",
+      },
+      {
+        number: "02",
+        title: "Personaalne\nlähenemine",
+        description: "Individuaalne raviplaan\niga patsiendi jaoks.",
+      },
+      {
+        number: "03",
+        title: "Kaasaegsed\ntehnoloogiad",
+        description: "3D-diagnostika, digitaalne naeratuse planeerimine ja premium-implantaadisüsteemid.",
+      },
+      {
+        number: "04",
+        title: "Kõrged ohutus-\nstandardid",
+        description: "Steriilsed protokollid, Euroopa materjalid ja õrn tuimastus igas etapis.",
+      },
+    ],
+    contact: {
+      eyebrow: "Aja broneerimine",
+      title1: "Oleme valmis",
+      titleStrong: "aitama",
+      copy: "Jätke oma kontaktid ja me helistame tagasi, et leida konsultatsiooniks mugav aeg.",
+      doctorLabel: "Juhtiv arst",
+      phone: "Telefon",
+      email: "E-post",
+      address: "Kliiniku aadress",
+      addressValue: "Tatari 6, Tallinn, Eesti",
+    },
+    footer: {
+      brand: "Caninus hambaravi",
+      legal: "Reg. nr: 14044544 · Tatari 6, Tallinn, Eesti",
+      privacy: "Privaatsuspoliitika",
+      terms: "Teenustingimused",
+    },
+    modal: {
+      close: "Sulge aken",
+      title: "Sait on veel arendamisel",
+      body: "Täiendame saidi jaotisi ja lisame materjale järk-järgult. Konsultatsioonile saab juba broneerida telefoni või kontaktivormi kaudu.",
+      item1Title: "Jaotised ilmuvad peagi",
+      item1Text: "Teenused ja tulemused valmistatakse praegu avaldamiseks ette.",
+      item2Title: "Info on kontrollimisel",
+      item2Text: "Kogume kliinilisi andmeid hoolikalt, et näidata neid korrektselt.",
+      action: "Sain aru",
+    },
+  },
+  ru: {
+    brandSubtitle: "Стоматология",
+    navLabel: "Основное меню",
+    nav: {
+      home: "Главная",
+      about: "О клинике",
+      services: "Услуги",
+      results: "Результаты",
+      contacts: "Контакты",
+    },
+    location: "Таллинн, Tatari 6",
+    call: "Позвонить",
+    languageLabel: "Язык",
+    languageEt: "Эстонский",
+    languageRu: "Русский",
+    hero: {
+      eyebrow: "Стоматология Caninus",
+      line1: "Инновационная",
+      strong: "реставрация",
+      middle: "зубов",
+      technology: "технология",
+      forWord: "для",
+      healthy: "здоровой",
+      cta: "Записаться на консультацию",
+      noteLeft: "Контроль приживления",
+      noteRight: "Премиальные материалы",
+      smilePrefix: "и",
+      smileStrong: "Уверенной",
+      smileLine: "Улыбки",
+      patients:
+        "Пациентов с комплексными стоматологическими задачами прошли диагностику, получили персональный план лечения и вернули комфорт при жевании.",
+      statsLabel: "Опыт Caninus",
+      downLabel: "Перейти к статистике клиники",
+      aboutLink: "О нас",
+    },
+    stats: {
+      years: "Лет\nопыта",
+      clinics: "Клиники\nв Европе",
+    },
+    about: {
+      kicker: "О нас",
+      line1: "Больше, чем",
+      clinic: "клиника",
+      accent: "Ваш партнер",
+      line3: "улыбки",
+      copy: "В Caninus вы получаете не просто лечение, а внимательного партнера в здоровье и уверенности вашей улыбки.",
+      prev: "Предыдущая карточка",
+      next: "Следующая карточка",
+      cardsLabel: "Преимущества клиники",
+    },
+    serviceCards: [
+      {
+        number: "01",
+        title: "Опытные\nспециалисты",
+        description: "Ведущие хирурги-стоматологи с опытом более 10 лет клинической практики в Эстонии и странах ЕС.",
+      },
+      {
+        number: "02",
+        title: "Персональный\nподход",
+        description: "Индивидуальные планы\nлечения для каждого пациента.",
+      },
+      {
+        number: "03",
+        title: "Передовые\nтехнологии",
+        description: "3D-диагностика, цифровое планирование улыбки и премиальные имплантационные системы.",
+      },
+      {
+        number: "04",
+        title: "Высокие стандарты\nбезопасности",
+        description: "Стерильные протоколы, европейские материалы и щадящая анестезия на каждом этапе.",
+      },
+    ],
+    contact: {
+      eyebrow: "Запись на прием",
+      title1: "Мы готовы",
+      titleStrong: "помочь",
+      copy: "Оставьте контакты, и мы перезвоним для подбора комфортного времени консультации.",
+      doctorLabel: "Ведущий врач",
+      phone: "Телефон",
+      email: "Электронная почта",
+      address: "Адрес клиники",
+      addressValue: "Tatari 6, Таллинн, Эстония",
+    },
+    footer: {
+      brand: "Стоматология Caninus",
+      legal: "Рег. номер: 14044544 · Tatari 6, Tallinn, Эстония",
+      privacy: "Политика конфиденциальности",
+      terms: "Условия обслуживания",
+    },
+    modal: {
+      close: "Закрыть окно",
+      title: "Сайт еще в разработке",
+      body: "Мы дорабатываем разделы сайта и постепенно добавляем материалы. Запись на консультацию уже доступна по телефону и через контактную форму.",
+      item1Title: "Разделы появятся скоро",
+      item1Text: "Услуги и результаты сейчас готовятся к публикации.",
+      item2Title: "Информация проверяется",
+      item2Text: "Мы аккуратно собираем клинические данные, чтобы показать их корректно.",
+      action: "Понятно",
+    },
+  },
+} satisfies Record<Language, {
+  brandSubtitle: string;
+  navLabel: string;
+  nav: Record<"home" | "about" | "services" | "results" | "contacts", string>;
+  location: string;
+  call: string;
+  languageLabel: string;
+  languageEt: string;
+  languageRu: string;
+  hero: Record<string, string>;
+  stats: Record<"years" | "clinics", string>;
+  about: Record<string, string>;
+  serviceCards: ServiceCard[];
+  contact: Record<string, string>;
+  footer: Record<"brand" | "legal" | "privacy" | "terms", string>;
+  modal: Record<string, string>;
+}>;
 
 export default function App() {
   useEffect(() => {
@@ -26,10 +256,20 @@ export default function App() {
     };
   }, []);
 
+  const [language, setLanguage] = useState<Language>(getInitialLanguage);
   const [aboutCardIndex, setAboutCardIndex] = useState(1);
-  const [isDevelopmentModalOpen, setDevelopmentModalOpen] = useState(false);
+  const [isDevelopmentModalOpen, setDevelopmentModalOpen] = useState(true);
+  const [introProgress, setIntroProgress] = useState(0);
+  const [introPhase, setIntroPhase] = useState<IntroPhase>("notice");
+  const developmentModalActionRef = useRef<HTMLButtonElement>(null);
+  const statsRef = useRef<HTMLDivElement>(null);
   const aboutRef = useRef<HTMLDivElement>(null);
   const contactRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    document.documentElement.lang = language;
+    window.localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
+  }, [language]);
 
   useEffect(() => {
     const target = window.location.hash === "#about" ? aboutRef : window.location.hash === "#contact" ? contactRef : null;
@@ -42,32 +282,75 @@ export default function App() {
     return () => window.clearTimeout(timeout);
   }, []);
 
-  const serviceCards: ServiceCard[] = [
-    {
-      number: "01",
-      title: "Опытные\nспециалисты",
-      description: "Ведущие хирурги-стоматологи с опытом более 12 лет клинической практики в Эстонии и странах ЕС.",
-    },
-    {
-      number: "02",
-      title: "Персональный\nподход",
-      description: "Индивидуальные планы\nлечения для каждого пациента.",
-      isActive: true,
-    },
-    {
-      number: "03",
-      title: "Передовые\nтехнологии",
-      description: "3D-диагностика, цифровое планирование улыбки и премиальные имплантационные системы.",
-    },
-    {
-      number: "04",
-      title: "Высокие стандарты\nбезопасности",
-      description: "Стерильные протоколы, европейские материалы и щадящая анестезия на каждом этапе.",
-    },
-  ];
+  useEffect(() => {
+    if (introPhase !== "loading") return;
+
+    setIntroProgress(0);
+    const startedAt = Date.now();
+    const duration = 2750;
+    const ease = gsap.parseEase("power3.out");
+    let splitTimeout = 0;
+
+    const interval = window.setInterval(() => {
+      const elapsed = Date.now() - startedAt;
+      const progress = Math.min(1, elapsed / duration);
+
+      setIntroProgress(Math.round(ease(progress) * 100));
+
+      if (progress < 1) return;
+
+      window.clearInterval(interval);
+      setIntroProgress(100);
+      splitTimeout = window.setTimeout(() => setIntroPhase("split"), 170);
+    }, 24);
+
+    return () => {
+      window.clearInterval(interval);
+      window.clearTimeout(splitTimeout);
+    };
+  }, [introPhase]);
+
+  useEffect(() => {
+    if (introPhase !== "split") return;
+
+    const timeout = window.setTimeout(() => setIntroPhase("revealing"), 1180);
+    return () => window.clearTimeout(timeout);
+  }, [introPhase]);
+
+  useEffect(() => {
+    if (introPhase !== "revealing") return;
+
+    const timeout = window.setTimeout(() => setIntroPhase("done"), 980);
+    return () => window.clearTimeout(timeout);
+  }, [introPhase]);
+
+  useEffect(() => {
+    if (introPhase === "done" && !isDevelopmentModalOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [introPhase, isDevelopmentModalOpen]);
+
+  const t = copy[language];
+  const serviceCards: ServiceCard[] = t.serviceCards.map((card, idx) => ({ ...card, isActive: idx === 1 }));
+  const renderLineBreaks = (value: string) =>
+    value.split("\n").map((line, idx, lines) => (
+      <Fragment key={`${line}-${idx}`}>
+        {line}
+        {idx < lines.length - 1 && <br />}
+      </Fragment>
+    ));
 
   const scrollToAbout = () => {
     aboutRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const scrollToStats = () => {
+    statsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const scrollToContact = () => {
@@ -80,10 +363,16 @@ export default function App() {
 
   const closeDevelopmentModal = () => {
     setDevelopmentModalOpen(false);
+
+    if (introPhase === "notice") {
+      window.setTimeout(() => setIntroPhase("loading"), 180);
+    }
   };
 
   useEffect(() => {
     if (!isDevelopmentModalOpen) return;
+
+    window.setTimeout(() => developmentModalActionRef.current?.focus(), 80);
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") closeDevelopmentModal();
@@ -91,7 +380,7 @@ export default function App() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isDevelopmentModalOpen]);
+  }, [introPhase, isDevelopmentModalOpen]);
 
   const handleNextCard = () => {
     setAboutCardIndex((prev) => (prev + 1) % serviceCards.length);
@@ -101,145 +390,184 @@ export default function App() {
     setAboutCardIndex((prev) => (prev - 1 + serviceCards.length) % serviceCards.length);
   };
 
+  const isIntroRevealing = introPhase === "revealing" || introPhase === "done";
+  const siteIntroClass = isIntroRevealing ? "is-intro-complete" : "is-intro-loading";
+  const introLayerClass = [
+    "intro-loader-screen",
+    introPhase === "split" || introPhase === "revealing" ? "is-splitting" : "",
+    introPhase === "revealing" ? "is-revealing" : "",
+  ].filter(Boolean).join(" ");
+
   return (
-    <div className="site-shell min-h-screen text-[#202124] font-sans antialiased overflow-x-clip">
+    <div className={`site-shell ${siteIntroClass} lang-${language} min-h-screen text-[#202124] font-sans antialiased overflow-x-clip`}>
+      {introPhase !== "notice" && introPhase !== "done" && (
+        <div className={introLayerClass} aria-hidden="true">
+          <div className="intro-loader-implant">
+            <div className="intro-progress-layer">
+              <span className="intro-loader-number">{introProgress}</span>
+              <span className="intro-split-number intro-split-one">1</span>
+              <span className="intro-split-number intro-split-zeroes">00</span>
+            </div>
+            <video autoPlay loop muted playsInline preload="auto">
+              <source src="/implant-anim.webm?v=clean-20260601" type="video/webm" />
+            </video>
+          </div>
+        </div>
+      )}
+
       <header className="site-header">
-        <button className="brand-mark" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} aria-label="Caninus">
-          <span className="brand-icon">C</span>
-          <span>
-            <strong>CANINUS</strong>
-            <small>Стоматология</small>
-          </span>
+        <button className="brand-mark" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} aria-label="Caninus Hambaravi">
+          <img className="brand-logo" src="/caninus-logo-wordmark.png" alt="" aria-hidden="true" />
         </button>
 
-        <nav className="site-nav" aria-label="Основное меню">
-          <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>Главная</button>
-          <button onClick={scrollToAbout}>О клинике</button>
+        <nav className="site-nav" aria-label={t.navLabel}>
+          <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>{t.nav.home}</button>
+          <button onClick={scrollToAbout}>{t.nav.about}</button>
           <button className="site-nav-dev" onClick={openDevelopmentModal}>
-            <span>Услуги</span>
+            <span>{t.nav.services}</span>
             <span className="nav-dev-badge">DEV</span>
           </button>
           <button className="site-nav-dev" onClick={openDevelopmentModal}>
-            <span>Результаты</span>
+            <span>{t.nav.results}</span>
             <span className="nav-dev-badge">DEV</span>
           </button>
-          <button onClick={scrollToContact}>Контакты</button>
+          <button onClick={scrollToContact}>{t.nav.contacts}</button>
         </nav>
 
         <div className="header-actions">
           <span className="header-location">
             <MapPin className="w-3.5 h-3.5" />
-            Таллинн, Tatari 6
+            {t.location}
           </span>
-          <a className="header-call" href="tel:+37256155030">Позвонить</a>
+          <div className="language-switch" aria-label={t.languageLabel}>
+            <button
+              className={language === "et" ? "is-active" : ""}
+              onClick={() => setLanguage("et")}
+              aria-pressed={language === "et"}
+              title={t.languageEt}
+            >
+              ET
+            </button>
+            <button
+              className={language === "ru" ? "is-active" : ""}
+              onClick={() => setLanguage("ru")}
+              aria-pressed={language === "ru"}
+              title={t.languageRu}
+            >
+              RU
+            </button>
+          </div>
+          <a className="header-call" href="tel:+37256155030">{t.call}</a>
         </div>
       </header>
 
-      <section className="hero-section">
-        <div className="hero-spark" aria-hidden="true">✦</div>
+      <div className="hero-stats-stage">
+        <ScrollVideoPlayer className="hero-shared-implant" />
 
-        <div className="hero-title-block">
-          <p className="hero-eyebrow">Стоматология Caninus</p>
-          <h1 className="hero-title">
-            <span className="hero-title-line hero-title-line-offset">Инновационная</span>
-            <span className="hero-title-line">
-              <strong>реставрация</strong> зубов <em>технология</em>
-            </span>
-            <span className="hero-title-line">
-              для <em className="hero-healthy-word">здоровой</em>
-            </span>
-          </h1>
+        <section className="hero-section">
+          <div className="hero-spark" aria-hidden="true">✦</div>
 
-          <button className="hero-cta" onClick={scrollToContact}>
-            Записаться на консультацию
-          </button>
-        </div>
+          <div className="hero-title-block">
+            <p className="hero-eyebrow">{t.hero.eyebrow}</p>
+            <h1 className="hero-title">
+              <span className="hero-title-line hero-title-line-offset">{t.hero.line1}</span>
+              <span className="hero-title-line">
+                <strong>{t.hero.strong}</strong> {t.hero.middle} <em>{t.hero.technology}</em>
+              </span>
+              <span className="hero-title-line">
+                {t.hero.forWord} <em className="hero-healthy-word">{t.hero.healthy}</em>
+              </span>
+            </h1>
 
-        <ScrollVideoPlayer />
-
-        <svg className="hero-orbit hero-orbit-back" viewBox="0 0 1000 240" preserveAspectRatio="none" aria-hidden="true">
-          <path d="M42 154C178 42 632-14 920 82C1110 145 830 232 512 212C212 194-74 212 42 154Z" />
-        </svg>
-        <svg className="hero-orbit hero-orbit-front" viewBox="0 0 1000 240" preserveAspectRatio="none" aria-hidden="true">
-          <path d="M376 181C450 202 552 205 640 188" />
-        </svg>
-
-        <div className="implant-note implant-note-left">
-          <span className="implant-dot" />
-          <p>Контроль приживления</p>
-        </div>
-
-        <div className="implant-note implant-note-right">
-          <span className="implant-dot" />
-          <p>Премиальные материалы</p>
-        </div>
-
-        <div className="hero-smile-block">
-          <p>
-            и <strong>Уверенной</strong>
-          </p>
-          <p>Улыбки</p>
-        </div>
-
-        <div className="hero-patient-copy">
-          <div className="hero-mini-stat">
-            <span>✦</span>
-            <strong>1350+</strong>
+            <button className="hero-cta" onClick={scrollToContact}>
+              {t.hero.cta}
+            </button>
           </div>
-          <p>
-            Пациентов с комплексными стоматологическими задачами прошли диагностику,
-            получили персональный план лечения и вернули комфорт при жевании.
-          </p>
-        </div>
 
-        <div className="hero-stat hero-stat-years">
-          <strong>10</strong>
-          <span>Лет<br />опыта</span>
-        </div>
+          <svg className="hero-orbit hero-orbit-back" viewBox="0 0 1000 240" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M68 156C232 52 728 36 930 116" />
+          </svg>
+          <svg className="hero-orbit hero-orbit-front" viewBox="0 0 1000 240" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M252 170C386 218 614 214 748 166" />
+          </svg>
 
-        <div className="hero-stat hero-stat-clinics">
-          <span>Клиники<br />в Европе</span>
-          <strong>02</strong>
-        </div>
+          <div className="implant-note implant-note-left">
+            <span className="implant-dot" />
+            <p>{t.hero.noteLeft}</p>
+          </div>
 
-        <button className="hero-down-button" onClick={scrollToAbout} aria-label="Перейти к разделу о клинике">
-          ↓
-        </button>
+          <div className="implant-note implant-note-right">
+            <span className="implant-dot" />
+            <p>{t.hero.noteRight}</p>
+          </div>
 
-        <button className="hero-about-link" onClick={scrollToAbout}>
-          О нас
-        </button>
-      </section>
+          <div className="hero-smile-block">
+            <p>
+              {t.hero.smilePrefix} <strong>{t.hero.smileStrong}</strong>
+            </p>
+            <p>{t.hero.smileLine}</p>
+          </div>
+
+          <div className="hero-patient-copy">
+            <div className="hero-mini-stat">
+              <span>✦</span>
+              <strong>1350+</strong>
+            </div>
+            <p>
+              {t.hero.patients}
+            </p>
+          </div>
+
+          <button className="hero-down-button" onClick={scrollToStats} aria-label={t.hero.downLabel}>
+            ↓
+          </button>
+
+          <button className="hero-about-link" onClick={scrollToAbout}>
+            {t.hero.aboutLink}
+          </button>
+        </section>
+
+        <section ref={statsRef} className="stats-section" aria-label={t.hero.statsLabel}>
+          <div className="hero-stat hero-stat-years">
+            <strong>10</strong>
+            <span>{renderLineBreaks(t.stats.years)}</span>
+          </div>
+
+          <div className="hero-stat hero-stat-clinics">
+            <span>{renderLineBreaks(t.stats.clinics)}</span>
+            <strong>02</strong>
+          </div>
+        </section>
+      </div>
 
       <section ref={aboutRef} id="about" className="about-section">
-        <div className="about-kicker">О нас</div>
+        <div className="about-kicker">{t.about.kicker}</div>
 
         <div className="about-header">
           <h2 className="about-title">
             <span>
-              Больше, чем <em>клиника</em>
+              {t.about.line1} <em>{t.about.clinic}</em>
             </span>
-            <span className="about-title-accent">Ваш партнер</span>
-            <span>улыбки</span>
+            <span className="about-title-accent">{t.about.accent}</span>
+            <span>{t.about.line3}</span>
           </h2>
 
           <p className="about-copy">
-            В Caninus вы получаете не просто лечение, а внимательного партнера
-            в здоровье и уверенности вашей улыбки.
+            {t.about.copy}
           </p>
         </div>
 
         <div className="about-carousel">
           <div className="about-controls">
-            <button onClick={handlePrevCard} aria-label="Предыдущая карточка" title="Предыдущая карточка">
+            <button onClick={handlePrevCard} aria-label={t.about.prev} title={t.about.prev}>
               <ChevronLeft className="w-5 h-5 stroke-[1.2]" />
             </button>
-            <button onClick={handleNextCard} aria-label="Следующая карточка" title="Следующая карточка">
+            <button onClick={handleNextCard} aria-label={t.about.next} title={t.about.next}>
               <ChevronRight className="w-5 h-5 stroke-[1.2]" />
             </button>
           </div>
 
-          <div className="about-cards" aria-label="Преимущества клиники">
+          <div className="about-cards" aria-label={t.about.cardsLabel}>
             {serviceCards.map((card, idx) => {
               const isSelected = aboutCardIndex === idx;
 
@@ -261,21 +589,22 @@ export default function App() {
 
       <div className="content-shell">
         <section className="route-section">
-          <RouteGuide />
+          <Suspense fallback={<div className="route-loading-surface" aria-hidden="true" />}>
+            <RouteGuide language={language} />
+          </Suspense>
         </section>
 
         <section ref={contactRef} id="contact" className="contact-section">
           <div className="contact-grid">
             <div className="contact-details">
               <div>
-                <span className="section-eyebrow">Запись на прием</span>
+                <span className="section-eyebrow">{t.contact.eyebrow}</span>
                 <h3>
-                  Мы готовы
-                  <strong>помочь</strong>
+                  {t.contact.title1}
+                  <strong>{t.contact.titleStrong}</strong>
                 </h3>
                 <p>
-                  Оставьте контакты, и мы перезвоним для подбора комфортного
-                  времени консультации.
+                  {t.contact.copy}
                 </p>
               </div>
 
@@ -284,7 +613,7 @@ export default function App() {
                   <img src="/jevgeni abramovits.png" alt="dr. Jevgeni Abramovits" />
                 </div>
                 <div>
-                  <span>Ведущий врач</span>
+                  <span>{t.contact.doctorLabel}</span>
                   <strong>dr. Jevgeni Abramovits</strong>
                 </div>
               </div>
@@ -293,46 +622,48 @@ export default function App() {
                 <div>
                   <Phone className="w-4 h-4" />
                   <p>
-                    <span>Телефон</span>
+                    <span>{t.contact.phone}</span>
                     <a href="tel:+37256155030">+372 56 155 030</a>
                   </p>
                 </div>
                 <div>
                   <Mail className="w-4 h-4" />
                   <p>
-                    <span>Электронная почта</span>
+                    <span>{t.contact.email}</span>
                     <a href="mailto:caninushambakliinik@gmail.com">caninushambakliinik@gmail.com</a>
                   </p>
                 </div>
                 <div>
                   <MapPin className="w-4 h-4" />
                   <p>
-                    <span>Адрес клиники</span>
-                    <strong>Tatari 6, Таллинн, Эстония</strong>
+                    <span>{t.contact.address}</span>
+                    <strong>{t.contact.addressValue}</strong>
                   </p>
                 </div>
               </div>
             </div>
 
             <div className="booking-panel">
-              <BookingForm onDevelopmentClick={openDevelopmentModal} />
+              <Suspense fallback={<div className="booking-loading-surface" aria-hidden="true" />}>
+                <BookingForm language={language} onDevelopmentClick={openDevelopmentModal} />
+              </Suspense>
             </div>
           </div>
         </section>
 
         <footer className="footer-section">
           <div className="footer-brand">
-            <span>CANINUS</span>
-            <p>Стоматология Caninus</p>
+            <img className="footer-logo" src="/caninus-logo.png" alt="Caninus Hambaravi" />
+            <p>{t.footer.brand}</p>
           </div>
 
           <div className="footer-wordmark">CANINUS</div>
 
           <div className="footer-legal">
-            <p>&copy; 2026 CANINUS HAMBAKLIINIK OÜ · Рег. номер: 14044544 · Tatari 6, Tallinn, Эстония</p>
+            <p>&copy; 2026 CANINUS HAMBAKLIINIK OÜ · {t.footer.legal}</p>
             <div>
-              <a href="/privacy-policy">Политика конфиденциальности</a>
-              <a href="/terms-of-service">Условия обслуживания</a>
+              <a href="/privacy-policy">{t.footer.privacy}</a>
+              <a href="/terms-of-service">{t.footer.terms}</a>
               <a href="/cookie-policy">Cookie</a>
             </div>
           </div>
@@ -348,7 +679,7 @@ export default function App() {
             aria-labelledby="development-modal-title"
             onMouseDown={(event) => event.stopPropagation()}
           >
-            <button className="development-modal-close" onClick={closeDevelopmentModal} aria-label="Закрыть окно">
+            <button className="development-modal-close" onClick={closeDevelopmentModal} aria-label={t.modal.close}>
               <X className="w-4 h-4" />
             </button>
 
@@ -357,31 +688,30 @@ export default function App() {
             </div>
 
             <span className="development-modal-kicker">Caninus hambakliinik</span>
-            <h2 id="development-modal-title">Сайт еще в разработке</h2>
+            <h2 id="development-modal-title">{t.modal.title}</h2>
             <p>
-              Мы дорабатываем разделы сайта и постепенно добавляем материалы. Запись на консультацию уже доступна
-              по телефону и через контактную форму.
+              {t.modal.body}
             </p>
 
             <div className="development-modal-list">
               <div>
                 <CalendarClock className="w-5 h-5 stroke-[1.6]" />
                 <p>
-                  <strong>Разделы появятся скоро</strong>
-                  <span>Услуги и результаты сейчас готовятся к публикации.</span>
+                  <strong>{t.modal.item1Title}</strong>
+                  <span>{t.modal.item1Text}</span>
                 </p>
               </div>
               <div>
                 <ShieldCheck className="w-5 h-5 stroke-[1.6]" />
                 <p>
-                  <strong>Информация проверяется</strong>
-                  <span>Мы аккуратно собираем клинические данные, чтобы показать их корректно.</span>
+                  <strong>{t.modal.item2Title}</strong>
+                  <span>{t.modal.item2Text}</span>
                 </p>
               </div>
             </div>
 
-            <button className="development-modal-action" onClick={closeDevelopmentModal}>
-              Понятно
+            <button ref={developmentModalActionRef} className="development-modal-action" onClick={closeDevelopmentModal}>
+              {t.modal.action}
             </button>
           </div>
         </div>

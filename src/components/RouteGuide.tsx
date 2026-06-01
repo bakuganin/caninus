@@ -4,6 +4,81 @@ import { MapPin, Compass, Train, Clock, Car } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
 import L from "leaflet";
 
+type Language = "et" | "ru";
+
+const routeCopy = {
+  et: {
+    kicker: "Kuidas tulla",
+    title: "Mugav asukoht Tallinna kesklinnas",
+    intro:
+      "Kliinik Caninus asub aadressil Tatari 6, Tallinn. See on vaid mõne minuti jalutuskäigu kaugusel Vabaduse väljakust.",
+    transit: "Transport",
+    walk: "Jalgsi",
+    car: "Autoga",
+    transitTitle: "Buss ja tramm",
+    transitIntro: "Lähim peatus on Vabaduse väljak, umbes 3-4 minuti jalutuskäigu kaugusel:",
+    transitItems: [
+      "Trammid 3, 4, 1 ja 5 peatuvad Vabaduse väljaku lähedal.",
+      "Bussid 5, 18, 36, 40 ja teised suuremad Tallinna liinid liiguvad lähedalt.",
+      "Minge mööda Tatari tänavat. Meie sissepääs jääb vasakule.",
+    ],
+    walkTitle: "Jalgsi Vabaduse väljakult",
+    walkIntro: "Kiire marsruut Vabaduse väljakult ja vanalinna servast:",
+    walkItems: [
+      "Alustage Vabaduse väljakult Vabadussõja võidusamba juurest.",
+      "Pöörake Tatari tänava suunas, orientiiriks on hotell Palace.",
+      "Kõndige mööda Tatari tänavat umbes 180 meetrit. Tatari 6 jääb vasakule.",
+    ],
+    carTitle: "Parkimine ja ligipääs",
+    carIntro: "Sõitke kohale Kaarli puiestee või Pärnu maantee poolt:",
+    carItems: [
+      "Tatari tänav asub KESKLINN parkimistsoonis.",
+      "Lähedal on EP18 Europarki parkla umbes 30 meetri kaugusel.",
+      "Tänaval parkides on võimalik kasutada 15 minutit tasuta parkimist parkimiskellaga.",
+    ],
+    busStop: "Vabaduse väljaku peatus",
+    square: "Vabaduse väljak",
+    parking: "EP18 parkla",
+    hours: "E-R: 9:00 - 18:00",
+    center: "Tallinna kesklinn",
+  },
+  ru: {
+    kicker: "Как добраться",
+    title: "Удобное расположение в центре Таллина",
+    intro:
+      "Клиника Caninus расположена по адресу Tatari 6, Tallinn. Это всего в нескольких минутах ходьбы от площади Свободы.",
+    transit: "Транспорт",
+    walk: "Пешком",
+    car: "На машине",
+    transitTitle: "Автобус и трамвай",
+    transitIntro: "Ближайшая остановка: Vabaduse väljak, всего 3-4 минуты ходьбы:",
+    transitItems: [
+      "Трамваи 3, 4, 1 и 5 останавливаются рядом с площадью Свободы.",
+      "Автобусы 5, 18, 36, 40 и другие ключевые маршруты Таллинна проходят рядом.",
+      "Пройдите по улице Tatari. Наша дверь будет слева.",
+    ],
+    walkTitle: "Пешком от Vabaduse väljak",
+    walkIntro: "Максимально быстрый маршрут от площади Свободы и Старого города:",
+    walkItems: [
+      "Начните с площади Vabaduse väljak у монумента Креста Свободы.",
+      "Поверните в сторону улицы Tatari, ориентир: гостиница Palace.",
+      "Следуйте по Tatari около 180 метров. Здание Tatari 6 находится слева.",
+    ],
+    carTitle: "Парковка и подъезд",
+    carIntro: "Подъезжайте со стороны Kaarli puiestee или Pärnu mnt:",
+    carItems: [
+      "Улица Tatari находится в парковочной зоне KESKLINN.",
+      "Можно использовать парковку EP18 Europark примерно в 30 метрах.",
+      "Вдоль Tatari возможны 15 минут бесплатной парковки с парковочными часами.",
+    ],
+    busStop: "Остановка Vabaduse väljak",
+    square: "Площадь Свободы",
+    parking: "Парковка EP18",
+    hours: "Пн-Пт: 9:00 - 18:00",
+    center: "Таллинн Центр",
+  },
+} satisfies Record<Language, Record<string, string | string[]>>;
+
 // Custom tooth marker icon
 const customIcon = new L.DivIcon({
   className: "custom-leaflet-marker",
@@ -22,7 +97,8 @@ function MapViewUpdater({ bounds }: { bounds: L.LatLngBoundsExpression }) {
   return null;
 }
 
-export default function RouteGuide() {
+export default function RouteGuide({ language }: { language: Language }) {
+  const t = routeCopy[language];
   const [activeTab, setActiveTab] = useState<"car" | "walk" | "transit">("transit");
 
   // Accurate Coordinates following Tallinn streets
@@ -68,13 +144,13 @@ export default function RouteGuide() {
       <div className="lg:col-span-5 flex flex-col justify-start space-y-6">
         <div className="space-y-4">
           <span className="text-[10px] font-sans tracking-[0.2em] uppercase text-stone-400 font-bold">
-            Как добраться
+            {t.kicker}
           </span>
           <h3 className="text-3xl font-extrabold text-stone-900 tracking-tight leading-none">
-            Удобное расположение в центре Таллина
+            {t.title}
           </h3>
           <p className="text-stone-500 text-sm leading-relaxed pb-4">
-            Клиника <strong>Caninus</strong> расположена по адресу <strong>Tatari 6, Tallinn</strong> (1-й этаж, отдельный вход со стороны тихой улицы Татари). Это всего в нескольких минутах ходьбы от площади Свободы (Vabaduse väljak).
+            {t.intro}
           </p>
         </div>
 
@@ -90,7 +166,7 @@ export default function RouteGuide() {
               <motion.div layoutId="tab-pill" className="absolute inset-0 bg-white rounded-full shadow-sm border border-stone-200/40 -z-10" />
             )}
             <Train className="w-4 h-4" />
-            <span>Транспорт</span>
+            <span>{t.transit}</span>
           </button>
 
           <button
@@ -103,7 +179,7 @@ export default function RouteGuide() {
               <motion.div layoutId="tab-pill" className="absolute inset-0 bg-white rounded-full shadow-sm border border-stone-200/40 -z-10" />
             )}
             <Compass className="w-4 h-4" />
-            <span>Пешком</span>
+            <span>{t.walk}</span>
           </button>
 
           <button
@@ -116,7 +192,7 @@ export default function RouteGuide() {
               <motion.div layoutId="tab-pill" className="absolute inset-0 bg-white rounded-full shadow-sm border border-stone-200/40 -z-10" />
             )}
             <Car className="w-4 h-4" />
-            <span>На машине</span>
+            <span>{t.car}</span>
           </button>
         </div>
 
@@ -134,15 +210,13 @@ export default function RouteGuide() {
               >
                 <div className="flex items-center gap-2 text-stone-900 font-bold">
                   <Train className="w-4 h-4 text-stone-800" />
-                  <h4>Автобус и Трамвай</h4>
+                  <h4>{t.transitTitle}</h4>
                 </div>
                 <p className="leading-relaxed">
-                  Ближайшая остановка — <strong>Vabaduse väljak</strong> (всего 3-4 минуты ходьбы):
+                  {t.transitIntro}
                 </p>
                 <ul className="list-disc pl-5 space-y-2 leading-relaxed">
-                  <li>Трамваи: <strong>3, 4, 1, 5</strong> останавливаются прямо на площади Свободы.</li>
-                  <li>Автобусы: Практически все ключевые маршруты Таллинна (например, <strong>5, 18, 36, 40</strong> и другие).</li>
-                  <li>Пройдите по улице <strong>Tatari</strong> мимо здания Колледжа английского языка. Наша дверь слева.</li>
+                  {(t.transitItems as string[]).map((item) => <li key={item}>{item}</li>)}
                 </ul>
               </motion.div>
             )}
@@ -158,15 +232,13 @@ export default function RouteGuide() {
               >
                 <div className="flex items-center gap-2 text-stone-900 font-bold">
                   <Compass className="w-4 h-4 text-stone-800" />
-                  <h4>Пешком от Vabaduse väljak</h4>
+                  <h4>{t.walkTitle}</h4>
                 </div>
                 <p className="leading-relaxed">
-                  Максимально быстрый маршрут от Ратушной площади и Старого города:
+                  {t.walkIntro}
                 </p>
                 <ol className="list-decimal pl-5 space-y-2 leading-relaxed">
-                  <li>Начните с площади <strong>Vabaduse väljak</strong> у монумента Креста Свободы.</li>
-                  <li>Поверните на перекресток в сторону улицы <strong>Tatari</strong> (ориентир — гостиница Palace).</li>
-                  <li>Следуйте по Tatari буквально <strong>180 метров</strong>. Здание <strong>Tatari 6</strong> находится слева.</li>
+                  {(t.walkItems as string[]).map((item) => <li key={item}>{item}</li>)}
                 </ol>
               </motion.div>
             )}
@@ -182,15 +254,13 @@ export default function RouteGuide() {
               >
                 <div className="flex items-center gap-2 text-stone-900 font-bold">
                   <Car className="w-4 h-4 text-stone-800" />
-                  <h4>Парковка и Подъезд</h4>
+                  <h4>{t.carTitle}</h4>
                 </div>
                 <p className="leading-relaxed">
-                  Подъезжайте со стороны бульвара Kaarli puiestee или Pärnu mnt:
+                  {t.carIntro}
                 </p>
                 <ul className="list-disc pl-5 space-y-2 leading-relaxed">
-                  <li>Улица Tatari находится в парковочной зоне <strong>KESKLINN</strong>.</li>
-                  <li>Вы можете использовать парковочную зону <strong>EP18</strong> (коммерческая стоянка Europark в 30м).</li>
-                  <li>Доступна парковка вдоль трассы Tatari. Возможны <strong>15 минут бесплатной парковки</strong> с часами!</li>
+                  {(t.carItems as string[]).map((item) => <li key={item}>{item}</li>)}
                 </ul>
               </motion.div>
             )}
@@ -226,19 +296,19 @@ export default function RouteGuide() {
           />
 
           {/* Pins for context */}
-          {activeTab === "transit" && (
+         {activeTab === "transit" && (
              <Marker position={busStopCoords}>
-               <Popup className="font-sans font-medium text-xs">Остановка Vabaduse väljak</Popup>
+               <Popup className="font-sans font-medium text-xs">{t.busStop}</Popup>
              </Marker>
           )}
           {activeTab === "walk" && (
              <Marker position={vabaduseCoords}>
-               <Popup className="font-sans font-medium text-xs">Площадь Свободы</Popup>
+               <Popup className="font-sans font-medium text-xs">{t.square}</Popup>
              </Marker>
           )}
           {activeTab === "car" && (
              <Marker position={parkingCoords}>
-               <Popup className="font-sans font-medium text-xs">Парковка EP18</Popup>
+               <Popup className="font-sans font-medium text-xs">{t.parking}</Popup>
              </Marker>
           )}
 
@@ -252,13 +322,13 @@ export default function RouteGuide() {
         <div className="absolute bottom-4 right-4 bg-white py-2.5 px-4 rounded-xl shadow-lg border border-stone-100 flex items-center gap-2 z-[400] pointer-events-none">
           <Clock className="w-4 h-4 text-[#8DA2B3]" />
           <span className="text-xs font-sans font-bold text-stone-800 tracking-wide">
-            Пн-Пт: 9:00 - 18:00
+            {t.hours}
           </span>
         </div>
 
         <div className="absolute top-4 left-4 bg-[#212121] py-1.5 px-3 rounded-full text-[10px] text-white font-sans uppercase tracking-widest flex items-center gap-1.5 shadow-md z-[400] pointer-events-none">
           <MapPin className="w-3 h-3 text-white" />
-          Таллинн Центр
+          {t.center}
         </div>
 
       </div>

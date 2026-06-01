@@ -4,10 +4,49 @@ import { BookingData } from "../types";
 import { Calendar, Phone, User, MessageSquare, Check, Loader2 } from "lucide-react";
 
 type BookingFormProps = {
+  language: "et" | "ru";
   onDevelopmentClick: () => void;
 };
 
-export default function BookingForm({ onDevelopmentClick }: BookingFormProps) {
+const bookingCopy = {
+  et: {
+    required: "Palun täitke nimi ja telefoninumber.",
+    fullName: "Teie nimi",
+    phone: "Telefoninumber",
+    problem: "Kirjeldage lühidalt oma muret",
+    preferredDate: "Soovitud visiidi kuupäev",
+    development: "Arenduses",
+    successTitle: "Päring on vastu võetud",
+    successText: "Saime teie konsultatsioonipäringu dr. Jevgeni Abramovitsile.",
+    patient: "Patsient:",
+    contactPhone: "Kontakttelefon:",
+    date: "Soovitud kuupäev:",
+    problemLabel: "Probleemi kirjeldus:",
+    note:
+      "Dr. Jevgeni Abramovits võtab teiega ühendust, et kinnitada täpne vastuvõtuaeg. Täname usalduse eest Caninuse kliiniku vastu.",
+    reset: "Broneeri veel kord",
+  },
+  ru: {
+    required: "Пожалуйста, заполните имя и номер телефона.",
+    fullName: "Ваше имя",
+    phone: "Номер телефона",
+    problem: "Опишите вкратце вашу проблему",
+    preferredDate: "Желаемая дата визита",
+    development: "В разработке",
+    successTitle: "Заявка принята!",
+    successText: "Мы успешно получили ваш запрос на консультацию у д-ра Евгения Абрамовитса.",
+    patient: "Пациент:",
+    contactPhone: "Телефон для связи:",
+    date: "Желаемая дата:",
+    problemLabel: "Описание проблемы:",
+    note:
+      "Д-р Евгений Абрамовитс свяжется с вами по указанному телефону в ближайшее время для подтверждения точного времени приема. Благодарим за доверие к клинике Caninus!",
+    reset: "Записаться еще раз",
+  },
+};
+
+export default function BookingForm({ language, onDevelopmentClick }: BookingFormProps) {
+  const t = bookingCopy[language];
   const [formData, setFormData] = useState<BookingData>({
     fullName: "",
     phone: "",
@@ -20,7 +59,7 @@ export default function BookingForm({ onDevelopmentClick }: BookingFormProps) {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!formData.fullName || !formData.phone) {
-      alert("Пожалуйста, заполните Имя и Номер телефона.");
+      alert(t.required);
       return;
     }
 
@@ -63,7 +102,7 @@ export default function BookingForm({ onDevelopmentClick }: BookingFormProps) {
                 htmlFor="fullName"
                 className="absolute text-stone-400 left-1 top-3 transition-all duration-300 transform -translate-y-6 scale-75 origin-[0] peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-stone-900"
               >
-                Ваше имя
+                {t.fullName}
               </label>
               <User className="absolute right-2 top-3 text-stone-300 w-5 h-5 pointer-events-none group-focus-within:text-stone-850 transition-colors" />
             </div>
@@ -83,7 +122,7 @@ export default function BookingForm({ onDevelopmentClick }: BookingFormProps) {
                 htmlFor="phone"
                 className="absolute text-stone-400 left-1 top-3 transition-all duration-300 transform -translate-y-6 scale-75 origin-[0] peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-stone-900"
               >
-                Номер телефона
+                {t.phone}
               </label>
               <Phone className="absolute right-2 top-3 text-stone-300 w-5 h-5 pointer-events-none group-focus-within:text-stone-850 transition-colors" />
             </div>
@@ -102,7 +141,7 @@ export default function BookingForm({ onDevelopmentClick }: BookingFormProps) {
                 htmlFor="problem"
                 className="absolute text-stone-400 left-1 top-3 transition-all duration-300 transform -translate-y-6 scale-75 origin-[0] peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-stone-900"
               >
-                Опишите вкратце вашу проблему
+                {t.problem}
               </label>
               <MessageSquare className="absolute right-2 top-3 text-stone-300 w-5 h-5 pointer-events-none group-focus-within:text-stone-850 transition-colors" />
             </div>
@@ -125,7 +164,7 @@ export default function BookingForm({ onDevelopmentClick }: BookingFormProps) {
                 htmlFor="preferredDate"
                 className="absolute text-stone-400 left-1 top-3 transition-all duration-300 transform -translate-y-6 scale-75 origin-[0] peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-stone-900"
               >
-                Желаемая дата визита
+                {t.preferredDate}
               </label>
               <Calendar className="absolute right-2 top-3 text-stone-300 w-5 h-5 pointer-events-none group-focus-within:text-stone-850 transition-colors" />
             </div>
@@ -137,7 +176,7 @@ export default function BookingForm({ onDevelopmentClick }: BookingFormProps) {
                 onClick={onDevelopmentClick}
                 className="development-form-button w-full sm:w-auto px-12 py-4.5 bg-[#212121] text-white rounded-full font-sans tracking-widest text-[13px] uppercase transition-all duration-300 shadow-md select-none flex items-center justify-center gap-3"
               >
-                В разработке
+                {t.development}
               </button>
             </div>
           </motion.form>
@@ -154,30 +193,30 @@ export default function BookingForm({ onDevelopmentClick }: BookingFormProps) {
             </div>
 
             <div className="space-y-2">
-              <h3 className="text-xl font-bold text-stone-905">Заявка принята!</h3>
+              <h3 className="text-xl font-bold text-stone-905">{t.successTitle}</h3>
               <p className="text-sm text-stone-500 max-w-sm">
-                Мы успешно получили ваш запрос на консультацию у <strong>д-ра Евгения Абрамовитса</strong>.
+                {t.successText}
               </p>
             </div>
 
             <div className="w-full border-t border-stone-100 pt-5 space-y-3 text-left text-xs text-stone-600">
               <div className="flex justify-between">
-                <span>Пациент:</span>
+                <span>{t.patient}</span>
                 <strong className="text-stone-850">{formData.fullName}</strong>
               </div>
               <div className="flex justify-between">
-                <span>Телефон для связи:</span>
+                <span>{t.contactPhone}</span>
                 <strong className="text-stone-850">{formData.phone}</strong>
               </div>
               {formData.preferredDate && (
                 <div className="flex justify-between">
-                  <span>Желаемая дата:</span>
+                  <span>{t.date}</span>
                   <strong className="text-stone-500">{formData.preferredDate}</strong>
                 </div>
               )}
               {formData.problem && (
                 <div className="flex flex-col gap-1 pt-1 border-t border-dashed border-stone-100 text-stone-500">
-                  <span>Описание проблемы:</span>
+                  <span>{t.problemLabel}</span>
                   <p className="italic text-stone-700 bg-stone-50 p-2 rounded border border-stone-100/50 mt-1">
                     "{formData.problem}"
                   </p>
@@ -186,14 +225,14 @@ export default function BookingForm({ onDevelopmentClick }: BookingFormProps) {
             </div>
 
             <p className="text-[11px] text-stone-400 pt-2 leading-relaxed">
-              Д-р Евгений Абрамовитс свяжется с вами по указанному телефону в ближайшее время для подтверждения точного времени приема. Благодарим за доверие к клинике Caninus!
+              {t.note}
             </p>
 
             <button
               onClick={handleReset}
               className="mt-4 px-6 py-2 border border-stone-300 hover:border-stone-900 rounded-full text-xs text-stone-600 hover:text-stone-900 hover:bg-stone-50 transition-all font-medium cursor-pointer"
             >
-              Записаться еще раз
+              {t.reset}
             </button>
           </motion.div>
         )}
