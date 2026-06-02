@@ -14,3 +14,5 @@ test_*.png
 verify-*.png
 public/frames/
 public/frames_alpha/
+
+.vercel

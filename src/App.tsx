@@ -3,7 +3,6 @@ import Lenis from "lenis";
 import { gsap } from "gsap";
 import { Calendar, ChevronLeft, ChevronRight, Mail, MapPin, Phone } from "lucide-react";
 
-import ScrollVideoPlayer from "./components/ScrollVideoPlayer";
 import { ServiceCard } from "./types";
 
 const BookingForm = lazy(() => import("./components/BookingForm"));
@@ -309,9 +308,9 @@ export default function App() {
 
     setIntroProgress(0);
     const startedAt = Date.now();
-    const duration = 2750;
+    const duration = 1100;
     const ease = gsap.parseEase("power3.out");
-    let splitTimeout = 0;
+    let revealTimeout = 0;
 
     const interval = window.setInterval(() => {
       const elapsed = Date.now() - startedAt;
@@ -323,26 +322,19 @@ export default function App() {
 
       window.clearInterval(interval);
       setIntroProgress(100);
-      splitTimeout = window.setTimeout(() => setIntroPhase("split"), 170);
+      revealTimeout = window.setTimeout(() => setIntroPhase("revealing"), 120);
     }, 24);
 
     return () => {
       window.clearInterval(interval);
-      window.clearTimeout(splitTimeout);
+      window.clearTimeout(revealTimeout);
     };
-  }, [introPhase]);
-
-  useEffect(() => {
-    if (introPhase !== "split") return;
-
-    const timeout = window.setTimeout(() => setIntroPhase("revealing"), 1180);
-    return () => window.clearTimeout(timeout);
   }, [introPhase]);
 
   useEffect(() => {
     if (introPhase !== "revealing") return;
 
-    const timeout = window.setTimeout(() => setIntroPhase("done"), 980);
+    const timeout = window.setTimeout(() => setIntroPhase("done"), 380);
     return () => window.clearTimeout(timeout);
   }, [introPhase]);
 
@@ -352,7 +344,7 @@ export default function App() {
       return;
     }
 
-    const timeout = window.setTimeout(() => setShowHeroNotice(true), 280);
+    const timeout = window.setTimeout(() => setShowHeroNotice(true), 160);
     return () => window.clearTimeout(timeout);
   }, [introPhase]);
 
@@ -444,16 +436,8 @@ export default function App() {
     <div className={`site-shell ${siteIntroClass} lang-${language} min-h-screen text-[#202124] font-sans antialiased overflow-x-clip`}>
       {introPhase !== "done" && (
         <div className={introLayerClass} aria-hidden="true">
-          <div className="intro-loader-implant">
-            <div className="intro-progress-layer">
-              <span className="intro-loader-number">{introProgress}</span>
-              <span className="intro-split-number intro-split-one">1</span>
-              <span className="intro-split-number intro-split-zeroes">00</span>
-            </div>
-            <img className="intro-implant-fallback" src="/implant-fallback.png" alt="" />
-            <video autoPlay loop muted playsInline preload="auto">
-              <source src="/implant-anim.webm?v=clean-20260601" type="video/webm" />
-            </video>
+          <div className="intro-loader-simple">
+            <span className="intro-loader-number">{introProgress}</span>
           </div>
         </div>
       )}
@@ -508,75 +492,10 @@ export default function App() {
         </div>
       </header>
 
-      <div className="hero-stats-stage">
-        <ScrollVideoPlayer className="hero-shared-implant" />
-
-        <section className="hero-section">
-          <div className="hero-title-block">
-            <p className="hero-eyebrow">{t.hero.eyebrow}</p>
-            <h1 className="hero-title">
-              <span className="hero-title-line hero-title-line-offset">{t.hero.line1}</span>
-              <span className="hero-title-line">
-                <strong>{t.hero.strong}</strong> {t.hero.middle} <em>{t.hero.technology}</em>
-              </span>
-              <span className="hero-title-line">
-                {t.hero.forWord} <em className="hero-healthy-word">{t.hero.healthy}</em>
-              </span>
-            </h1>
-
-            <button className="hero-cta" onClick={scrollToContact}>
-              {t.hero.cta}
-            </button>
-          </div>
-
-          <svg className="hero-orbit hero-orbit-back" viewBox="0 0 1000 240" preserveAspectRatio="none" aria-hidden="true">
-            <path d="M68 156C232 52 728 36 930 116" />
-          </svg>
-          <svg className="hero-orbit hero-orbit-front" viewBox="0 0 1000 240" preserveAspectRatio="none" aria-hidden="true">
-            <path d="M252 170C386 218 614 214 748 166" />
-          </svg>
-
-          <div className="implant-note implant-note-left">
-            <span className="implant-dot" />
-            <p>{t.hero.noteLeft}</p>
-          </div>
-
-          <div className="implant-note implant-note-right">
-            <span className="implant-dot" />
-            <p>{t.hero.noteRight}</p>
-          </div>
-
-          <div className="hero-smile-block">
-            <p>
-              {t.hero.smilePrefix} <strong>{t.hero.smileStrong}</strong>
-            </p>
-            <p>{t.hero.smileLine}</p>
-          </div>
-
-          <div className="hero-patient-copy">
-            <div className="hero-mini-stat">
-              <span>✦</span>
-              <strong>1350+</strong>
-            </div>
-            <p>
-              {t.hero.patients}
-            </p>
-          </div>
-
-          {SHOW_INTRO_SECTIONS && (
-            <>
-              <button className="hero-down-button" onClick={scrollToStats} aria-label={t.hero.downLabel}>
-                ↓
-              </button>
-
-              <button className="hero-about-link" onClick={scrollToAbout}>
-                {t.hero.aboutLink}
-              </button>
-            </>
-          )}
-
+      <div className="development-stage">
+        <section className="development-landing-section">
           {showHeroNotice && (
-            <div className="hero-development-layer" aria-labelledby="hero-development-title">
+            <div className="hero-development-layer is-standalone" aria-labelledby="hero-development-title">
               <div className="development-modal hero-development-notice">
                 <div className="development-modal-icon" aria-hidden="true">
                   <ToothIcon className="w-8 h-8" />
