@@ -3419,7 +3419,7 @@ button {
 
   .hero-development-notice {
     width: min(388px, 100%);
-    padding: 26px 20px 24px;
+    padding: 26px 20px 40px;
     margin-inline: auto;
   }
 

@@ -353,7 +353,7 @@ export default function RouteGuide({ language }: { language: Language }) {
           </span>
         </div>
 
-        <div className="absolute top-4 left-4 bg-[#212121] py-1.5 px-3 rounded-full text-[10px] text-white font-sans uppercase tracking-widest flex items-center gap-1.5 shadow-md z-[400] pointer-events-none">
+        <div className="absolute top-20 left-4 bg-[#212121] py-1.5 px-3 rounded-full text-[10px] text-white font-sans uppercase tracking-widest flex items-center gap-1.5 shadow-md z-[400] pointer-events-none">
           <MapPin className="w-3 h-3 text-white" />
           {t.center}
         </div>
