@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { MapPin, Compass, Train, Clock, Car, ExternalLink, LocateFixed } from "lucide-react";
+import { MapPin, Train, Clock, Car, ExternalLink, LocateFixed, PersonStanding, type LucideIcon } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 
@@ -150,15 +150,27 @@ const routeCopy = {
 } satisfies Record<Language, Record<string, string | string[]>>;
 
 const routeIntroCopy = {
-  et:
-    "Caninus asub aadressil Tatari 6 Tallinna kesklinnas, Vabaduse valjaku ja peamiste uhistranspordi peatuste lahedal. Kui tulete autoga, arvestage KESKLINN parkimistsooniga, EP18 Europark parklaga umbes 30 meetri kaugusel ning 15-minutilise tasuta tanavaparkimise voimalusega parkimiskellaga. Vastuvotuajad: E-N 8:00 - 15:00, R 9:00 - 15:00, L kokkuleppel, P suletud.",
-  ru:
-    "Caninus находится по адресу Tatari 6 в центре Таллина, рядом с площадью Свободы и удобными остановками общественного транспорта. Если приезжаете на машине, учитывайте парковочную зону KESKLINN: рядом есть парковка EP18 Europark примерно в 30 метрах, а вдоль Tatari возможны 15 минут бесплатной парковки с парковочными часами. Часы работы: пн-чт 8:00 - 15:00, пт 9:00 - 15:00, суббота по договоренности, воскресенье закрыто.",
-  fi:
-    "Caninus sijaitsee osoitteessa Tatari 6 Tallinnan keskustassa, lahella Vabaduse valjakia ja hyvia julkisen liikenteen yhteyksia. Autolla tullessa huomioi KESKLINN-pysakointialue, noin 30 metrin paassa oleva EP18 Europark seka 15 minuutin maksuton katupysakointi pysakointikellolla. Aukioloajat: ma-to 8:00 - 15:00, pe 9:00 - 15:00, la sopimuksen mukaan, su suljettu.",
-  en:
-    "Caninus is located at Tatari 6 in central Tallinn, close to Freedom Square and convenient public transport stops. If you arrive by car, please note the KESKLINN parking zone, the EP18 Europark parking area about 30 meters away, and the option for 15 minutes of free street parking with a parking clock. Opening hours: Mon-Thu 8:00 - 15:00, Fri 9:00 - 15:00, Sat by appointment, Sun closed.",
-} satisfies Record<Language, string>;
+  et: [
+    ["Aadress:", " Tatari 6 Tallinna kesklinnas, Vabaduse valjaku ja peamiste uhistranspordi peatuste lahedal."],
+    ["Parkimine:", " KESKLINN parkimistsoon, EP18 Europark umbes 30 meetri kaugusel ning 15 minutit tasuta tanavaparkimist parkimiskellaga."],
+    ["Vastuvotuajad:", " E-N 8:00 - 15:00, R 9:00 - 15:00, L kokkuleppel, P suletud."],
+  ],
+  ru: [
+    ["Адрес:", " Tatari 6 в центре Таллина, рядом с площадью Свободы и удобными остановками общественного транспорта."],
+    ["Парковка:", " зона KESKLINN, парковка EP18 Europark примерно в 30 метрах, вдоль Tatari возможны 15 минут бесплатной парковки с парковочными часами."],
+    ["Часы работы:", " пн-чт 8:00 - 15:00, пт 9:00 - 15:00, суббота по договоренности, воскресенье закрыто."],
+  ],
+  fi: [
+    ["Osoite:", " Tatari 6 Tallinnan keskustassa, lahella Vabaduse valjakia ja hyvia julkisen liikenteen yhteyksia."],
+    ["Pysakointi:", " KESKLINN-pysakointialue, EP18 Europark noin 30 metrin paassa seka 15 minuutin maksuton katupysakointi pysakointikellolla."],
+    ["Aukioloajat:", " ma-to 8:00 - 15:00, pe 9:00 - 15:00, la sopimuksen mukaan, su suljettu."],
+  ],
+  en: [
+    ["Address:", " Tatari 6 in central Tallinn, close to Freedom Square and convenient public transport stops."],
+    ["Parking:", " KESKLINN parking zone, EP18 Europark about 30 meters away, and 15 minutes of free street parking with a parking clock."],
+    ["Opening hours:", " Mon-Thu 8:00 - 15:00, Fri 9:00 - 15:00, Sat by appointment, Sun closed."],
+  ],
+} satisfies Record<Language, [string, string][]>;
 
 const directionsCopy = {
   et: {
@@ -272,9 +284,9 @@ export default function RouteGuide({ language }: { language: Language }) {
     );
   };
 
-  const routeModes: { mode: TravelMode; label: string; Icon: typeof Train }[] = [
+  const routeModes: { mode: TravelMode; label: string; Icon: LucideIcon }[] = [
     { mode: "transit", label: directions.transit, Icon: Train },
-    { mode: "walking", label: directions.walking, Icon: Compass },
+    { mode: "walking", label: directions.walking, Icon: PersonStanding },
     { mode: "driving", label: directions.driving, Icon: Car },
   ];
 
@@ -289,9 +301,14 @@ export default function RouteGuide({ language }: { language: Language }) {
           <h3 className="text-3xl font-extrabold text-stone-900 tracking-tight leading-none">
             {t.title}
           </h3>
-          <p className="text-stone-500 text-sm leading-relaxed pb-4">
-            {routeIntro}
-          </p>
+          <div className="space-y-2 pb-4 text-sm leading-relaxed text-stone-500">
+            {routeIntro.map(([label, text]) => (
+              <p key={label}>
+                <strong className="font-extrabold text-stone-800">{label}</strong>
+                {text}
+              </p>
+            ))}
+          </div>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
@@ -323,19 +340,6 @@ export default function RouteGuide({ language }: { language: Language }) {
                 </span>
                 <span>{label}</span>
               </span>
-
-              {mode === "driving" && (
-                <span className="grid gap-2 text-xs font-medium leading-relaxed text-stone-500">
-                  <span className="flex gap-2">
-                    <Car className="mt-0.5 h-3.5 w-3.5 shrink-0 text-stone-500" aria-hidden="true" />
-                    <span>{(t.carItems as string[])[1]}</span>
-                  </span>
-                  <span className="flex gap-2">
-                    <Clock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-stone-500" aria-hidden="true" />
-                    <span>{(t.carItems as string[])[2]}</span>
-                  </span>
-                </span>
-              )}
 
               <span className="mt-auto flex items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-stone-400">
                 {directions.open}
