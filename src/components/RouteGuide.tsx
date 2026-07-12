@@ -149,6 +149,17 @@ const routeCopy = {
   },
 } satisfies Record<Language, Record<string, string | string[]>>;
 
+const routeIntroCopy = {
+  et:
+    "Caninus asub aadressil Tatari 6 Tallinna kesklinnas, Vabaduse valjaku ja peamiste uhistranspordi peatuste lahedal. Kui tulete autoga, arvestage KESKLINN parkimistsooniga, EP18 Europark parklaga umbes 30 meetri kaugusel ning 15-minutilise tasuta tanavaparkimise voimalusega parkimiskellaga. Vastuvotuajad: E-N 8:00 - 15:00, R 9:00 - 15:00, L kokkuleppel, P suletud.",
+  ru:
+    "Caninus находится по адресу Tatari 6 в центре Таллина, рядом с площадью Свободы и удобными остановками общественного транспорта. Если приезжаете на машине, учитывайте парковочную зону KESKLINN: рядом есть парковка EP18 Europark примерно в 30 метрах, а вдоль Tatari возможны 15 минут бесплатной парковки с парковочными часами. Часы работы: пн-чт 8:00 - 15:00, пт 9:00 - 15:00, суббота по договоренности, воскресенье закрыто.",
+  fi:
+    "Caninus sijaitsee osoitteessa Tatari 6 Tallinnan keskustassa, lahella Vabaduse valjakia ja hyvia julkisen liikenteen yhteyksia. Autolla tullessa huomioi KESKLINN-pysakointialue, noin 30 metrin paassa oleva EP18 Europark seka 15 minuutin maksuton katupysakointi pysakointikellolla. Aukioloajat: ma-to 8:00 - 15:00, pe 9:00 - 15:00, la sopimuksen mukaan, su suljettu.",
+  en:
+    "Caninus is located at Tatari 6 in central Tallinn, close to Freedom Square and convenient public transport stops. If you arrive by car, please note the KESKLINN parking zone, the EP18 Europark parking area about 30 meters away, and the option for 15 minutes of free street parking with a parking clock. Opening hours: Mon-Thu 8:00 - 15:00, Fri 9:00 - 15:00, Sat by appointment, Sun closed.",
+} satisfies Record<Language, string>;
+
 const directionsCopy = {
   et: {
     title: "Marsruut teie asukohast",
@@ -211,6 +222,7 @@ function MapViewUpdater({ center }: { center: L.LatLngExpression }) {
 
 export default function RouteGuide({ language }: { language: Language }) {
   const t = routeCopy[language];
+  const routeIntro = routeIntroCopy[language];
   const directions = directionsCopy[language];
   const [routeStatus, setRouteStatus] = useState<"idle" | "locating" | "fallback">("idle");
 
@@ -278,12 +290,12 @@ export default function RouteGuide({ language }: { language: Language }) {
             {t.title}
           </h3>
           <p className="text-stone-500 text-sm leading-relaxed pb-4">
-            {t.intro}
+            {routeIntro}
           </p>
         </div>
 
-        <div className="grid gap-4 rounded-2xl border border-stone-200/60 bg-white/52 p-4 shadow-sm">
-          <div className="flex gap-3">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="flex min-h-36 flex-col gap-3 rounded-lg border border-stone-200/70 bg-white/72 p-4 shadow-sm">
             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-stone-900 text-white">
               <LocateFixed className="h-4 w-4" aria-hidden="true" />
             </span>
@@ -291,44 +303,46 @@ export default function RouteGuide({ language }: { language: Language }) {
               <h4 className="text-sm font-extrabold text-stone-900">{directions.title}</h4>
               <p className="mt-1 text-xs leading-relaxed text-stone-500">{directions.intro}</p>
             </div>
+            {routeStatus !== "idle" && (
+              <p className="mt-auto text-xs leading-relaxed text-stone-500" role="status">
+                {routeStatus === "locating" ? directions.locating : directions.fallback}
+              </p>
+            )}
           </div>
 
-          <div className="grid gap-2">
-            {routeModes.map(({ mode, label, Icon }) => (
-              <button
-                key={mode}
-                type="button"
-                onClick={() => openDirections(mode)}
-                className="group flex min-h-12 w-full items-center justify-between gap-3 rounded-xl border border-stone-200/70 bg-white/72 px-4 text-left text-sm font-bold text-stone-800 transition-all hover:border-stone-300 hover:bg-white hover:shadow-sm"
-              >
-                <span className="flex min-w-0 items-center gap-3">
-                  <Icon className="h-4 w-4 shrink-0 text-stone-600" aria-hidden="true" />
-                  <span>{label}</span>
+          {routeModes.map(({ mode, label, Icon }) => (
+            <button
+              key={mode}
+              type="button"
+              onClick={() => openDirections(mode)}
+              className="group flex min-h-36 w-full flex-col items-start justify-between gap-4 rounded-lg border border-stone-200/70 bg-white/72 p-4 text-left text-sm font-bold text-stone-800 shadow-sm transition-all hover:border-stone-300 hover:bg-white hover:shadow-md"
+            >
+              <span className="flex min-w-0 items-center gap-3">
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-stone-100 text-stone-700">
+                  <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                 </span>
-                <span className="flex items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-stone-400">
-                  {directions.open}
-                  <ExternalLink className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                <span>{label}</span>
+              </span>
+
+              {mode === "driving" && (
+                <span className="grid gap-2 text-xs font-medium leading-relaxed text-stone-500">
+                  <span className="flex gap-2">
+                    <Car className="mt-0.5 h-3.5 w-3.5 shrink-0 text-stone-500" aria-hidden="true" />
+                    <span>{(t.carItems as string[])[1]}</span>
+                  </span>
+                  <span className="flex gap-2">
+                    <Clock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-stone-500" aria-hidden="true" />
+                    <span>{(t.carItems as string[])[2]}</span>
+                  </span>
                 </span>
-              </button>
-            ))}
-          </div>
+              )}
 
-          <div className="grid gap-2 border-t border-stone-200/70 pt-3 text-xs leading-relaxed text-stone-500">
-            <p className="flex gap-2">
-              <Car className="mt-0.5 h-3.5 w-3.5 shrink-0 text-stone-500" aria-hidden="true" />
-              <span>{(t.carItems as string[])[1]}</span>
-            </p>
-            <p className="flex gap-2">
-              <Clock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-stone-500" aria-hidden="true" />
-              <span>{(t.carItems as string[])[2]}</span>
-            </p>
-          </div>
-
-          {routeStatus !== "idle" && (
-            <p className="text-xs leading-relaxed text-stone-500" role="status">
-              {routeStatus === "locating" ? directions.locating : directions.fallback}
-            </p>
-          )}
+              <span className="mt-auto flex items-center gap-2 text-[10px] uppercase tracking-[0.12em] text-stone-400">
+                {directions.open}
+                <ExternalLink className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+              </span>
+            </button>
+          ))}
         </div>
       </div>
 

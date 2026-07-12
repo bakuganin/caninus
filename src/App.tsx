@@ -884,12 +884,6 @@ export default function App() {
       )}
 
       <div className="content-shell">
-        <section className="route-section">
-          <Suspense fallback={<div className="route-loading-surface" aria-hidden="true" />}>
-            <RouteGuide language={language} />
-          </Suspense>
-        </section>
-
         <section ref={contactRef} id="contact" className="contact-section">
           <div className="contact-grid">
             <div className="contact-details">
@@ -957,6 +951,12 @@ export default function App() {
               </Suspense>
             </div>
           </div>
+        </section>
+
+        <section className="route-section">
+          <Suspense fallback={<div className="route-loading-surface" aria-hidden="true" />}>
+            <RouteGuide language={language} />
+          </Suspense>
         </section>
 
         <footer className="footer-section">
