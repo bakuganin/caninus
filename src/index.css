@@ -436,7 +436,8 @@ button {
   justify-content: center;
 }
 
-.site-nav button {
+.site-nav button,
+.site-nav a {
   border: 0;
   background: transparent;
   color: rgba(32, 33, 36, 0.64);
@@ -445,11 +446,26 @@ button {
   font-weight: 700;
   line-height: 1;
   text-transform: uppercase;
+  text-decoration: none;
   transition: color 180ms ease;
 }
 
-.site-nav button:hover {
+.site-nav button:hover,
+.site-nav a:hover {
   color: var(--ink);
+}
+
+/* External shop link in the menu */
+.nav-shop-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.nav-shop-link svg {
+  width: 1.15em;
+  height: 1.15em;
+  flex-shrink: 0;
 }
 
 .site-nav-dev {

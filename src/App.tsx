@@ -1,8 +1,9 @@
 import { Fragment, lazy, Suspense, useEffect, useRef, useState } from "react";
 import Lenis from "lenis";
 import { gsap } from "gsap";
-import { Calendar, ChevronLeft, ChevronRight, Mail, MapPin, Phone, X } from "lucide-react";
+import { ArrowUpRight, Calendar, ChevronLeft, ChevronRight, Mail, MapPin, Phone, X } from "lucide-react";
 
+import { shopNavLabel, shopUrl } from "./shopLinks";
 import { ServiceCard } from "./types";
 
 const BookingForm = lazy(() => import("./components/BookingForm"));
@@ -716,6 +717,10 @@ export default function App() {
             </>
           )}
           <button onClick={scrollToContact}>{t.nav.contacts}</button>
+          <a className="nav-shop-link" href={shopUrl("header")} target="_blank" rel="noopener">
+            {shopNavLabel[language]}
+            <ArrowUpRight aria-hidden="true" />
+          </a>
         </nav>
 
         <div className="header-actions">

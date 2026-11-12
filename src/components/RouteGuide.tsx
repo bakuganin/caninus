@@ -359,11 +359,12 @@ export default function RouteGuide({ language }: { language: Language }) {
           scrollWheelZoom={false} 
           className="w-full h-full z-0"
           zoomControl={true}
-          attributionControl={false}
+          attributionControl={true}
         >
-          {/* Aesthetic light map tiles */}
+          {/* Keyless OpenStreetMap tiles (CARTO now requires an API key) */}
           <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           />
           
           <MapViewUpdater center={mapCenter} />
