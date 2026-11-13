@@ -979,6 +979,10 @@ export default function App() {
               <a href="/cookie-policy">{t.footer.cookie}</a>
             </div>
           </div>
+
+          <p className="footer-credit">
+            Code&amp;Design by <a href="https://tarkva.ee" target="_blank" rel="noopener">Tarkva.ee</a>
+          </p>
         </footer>
       </div>
 
