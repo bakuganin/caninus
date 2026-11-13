@@ -6,6 +6,8 @@
 }
 
 :root {
+  /* Content width cap on wide screens; header and sections share it. */
+  --layout-max: 1360px;
   --ink: #202124;
   --muted: #7f8f9c;
   --blue-quiet: #a6b8c8;
@@ -396,7 +398,7 @@ button {
   align-items: center;
   width: 100%;
   min-height: 72px;
-  padding: 14px clamp(22px, 3vw, 56px);
+  padding: 14px max(clamp(22px, 3vw, 56px), calc((100% - var(--layout-max)) / 2));
   border-bottom: 1px solid rgba(120, 140, 156, 0.18);
   background: rgba(220, 230, 239, 0.54);
   backdrop-filter: blur(16px);
@@ -1212,7 +1214,7 @@ button {
 }
 
 .content-shell {
-  padding: 0 clamp(20px, 3vw, 56px);
+  padding: 0 max(clamp(20px, 3vw, 56px), calc((100% - var(--layout-max)) / 2));
 }
 
 .route-section,
